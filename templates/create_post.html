@@ -8,7 +8,45 @@
 {% block main_content %}
 
 <h1>Create a Post</h1>
-<p>Filler.</p>
 
+<p>Upload Form</p>
+<form action="/post" method="POST"> 
+      <label for="title">Title your post:</label>
+      <input type="text" id="title" name="title" required>
+      <br>
+
+      <label for="description">Description:</label>
+      <input type="text" id="description" name="description">
+      <br>
+
+      <label for="tag">Tags:</label>
+      <input type="text" id="tag" name="tag">
+      <br>
+
+      <label for="file">Tags:</label>
+      <input type="text" id="tag" name="tag">
+      <br>
+
+      <label for="visibility">Visibility</label>
+      <select name="visibility" id="visibility" required>
+        <option value="">Pick One</option>
+        <option value="movie">Public</option>
+        <option value="person">Private</option>
+     </select>
+     <br>
+
+      <button type="submit">Submit</button>    
+</form>
+
+<br>
+<br>
+
+<!-- 
+<form method="post" action="{{url_for('file_upload')}}" enctype="multipart/form-data">
+    <p><label>NM: <input type="text" name="nm"></label></p>
+    <p><label>Pic: <input type="file" name="pic"></label></p>
+    <p><input type="submit" value="upload"></p>
+</form>
+-->
 
 {% endblock %}
