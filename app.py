@@ -13,13 +13,13 @@ import cs304dbi as dbi
 app.secret_key = secrets.token_hex()
 
 # configure DBI
-dsn = dbi.conf('wmdb')
+dsn = dbi.conf('mlp_db')
 
 # For Lookup, use 'wmdb'
 # For CRUD and Ajax, use your personal db
 # For project work, use your team db
 
-print(dbi.conf('wmdb'))
+print(dbi.conf('mlp_db'))
 
 # This gets us better error messages for certain common request errors
 app.config['TRAP_BAD_REQUEST_ERRORS'] = True
@@ -32,6 +32,32 @@ def index():
 def about():
     flash('this is a flashed message')
     return render_template('about.html', page_title='About Us')
+
+#
+@app.route('/profile/')
+def profile():
+    return render_template('profile.html', page_title='Profile')
+
+#
+@app.route('/login/')
+def login():
+    return render_template('login.html', page_title='Login')
+
+#
+@app.route('/post/')
+def create_post():
+    return render_template('create_post.html', page_title='Create a Post')
+
+#
+@app.route('/saved/')
+def saved_posts():
+    return render_template('saved_posts.html', page_title='Saved Posts')
+
+#
+@app.route('/following/')
+def following_feed():
+    return render_template('following_feed.html', page_title='Following Feed')
+
 
 
 if __name__ == '__main__':
