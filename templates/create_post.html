@@ -9,9 +9,8 @@
 
 <h1>Create a Post</h1>
 
-<p>Upload Form</p>
-<form action="/post" method="POST"> 
-      <label for="title">Title your post:</label>
+<form method="post" action="{{url_for('create_post')}}" enctype="multipart/form-data">
+    <label for="title">Title your post:</label>
       <input type="text" id="title" name="title" required>
       <br>
 
@@ -23,30 +22,33 @@
       <input type="text" id="tag" name="tag">
       <br>
 
-      <label for="file">Tags:</label>
-      <input type="text" id="tag" name="tag">
+      <label for="exp_date">Expiry Date:</label>
+      <!-- change to date type in table? -->
+      <input type="date" id="exp_date" name="exp_date" min="2026-10-11" />
       <br>
 
       <label for="visibility">Visibility</label>
       <select name="visibility" id="visibility" required>
         <option value="">Pick One</option>
-        <option value="movie">Public</option>
-        <option value="person">Private</option>
+        <option value="public">Public</option>
+        <option value="private">Private</option>
      </select>
      <br>
 
-      <button type="submit">Submit</button>    
-</form>
+     <br><br>
 
-<br>
-<br>
-
-<!-- 
-<form method="post" action="{{url_for('file_upload')}}" enctype="multipart/form-data">
+    <label for="picfile">Upload your spam</label>
+    <!-- remove? we have pic_id as auto-incrementing, so idk if we need
+     NM line here 
     <p><label>NM: <input type="text" name="nm"></label></p>
-    <p><label>Pic: <input type="file" name="pic"></label></p>
+    -->
+    <p><label>Spam file: <input type="file" name="pic"></label></p>
     <p><input type="submit" value="upload"></p>
 </form>
--->
+
+{% if nm != '' and src != '' %}
+<p>Last upload: {{nm}}</p>
+<p> <img src="{{src}}"></p>
+{% endif %}
 
 {% endblock %}
