@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+<h1>Hello!</h1>
+
+<p>Here's a link to <a target="_blank" href="{{url_for('all_likes')}}">
+        all likes</a>.</p>
+
+<p>Here is a list of items and their 'like' count</p>
+
+<ol id="itemList">
+    {% for item,count in items %}
+    <li><button data-item="{{item}}">+1</button>
+
+        <form method="post"
+              action="{{url_for('item_likes', item=item)}}">
+            <input type="submit" value="post incr"></form>
+
+        <a target="_blank" href="{{url_for('item_likes', item=item)}}">
+            {{url_for('item_likes', item=item)}}</a>
+
+        <span class="item">{{item}}</span>
+        has <span class="likes">{{count}}</span> likes.
+    </li>
+    {% endfor %}
+</ol>
+
+<h2>Add an item, count pair</h2>
+<form method="post" action="{{url_for('new_item')}}">
+    <p><label><input type="text" name="item" placeholder="eggs"> item</label></p>
+    <p><label><input type="text" name="count" placeholder="1"> count</label></p>
+    <p><input type="submit"></p>
+</form>
+
+<script src="{{url_for('static', filename='likes.js')}}"></script>
+<script src="{{url_for('static', filename='handler.js')}}"></script>
+
+<script>
+    document.getElementById('itemList')
+        .addEventListener( 'click', (e) => incrLikesHandler(e));
+</script>
+
+{% endblock %}

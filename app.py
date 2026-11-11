@@ -44,9 +44,10 @@ def login():
     return render_template('login.html', page_title='Login')
 
 #
-@app.route('/post/')
+@app.route('/post/', methods = ['POST'])
 def create_post():
     return render_template('create_post.html', page_title='Create a Post')
+                        
 
 #
 @app.route('/saved/')
