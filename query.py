@@ -1,23 +1,34 @@
 # Lula, Polina, Meleny
 # Modulation for SpamSwipe
 
+import cs304dbi as dbi
 from flask import (Flask, render_template, make_response, url_for, request,
                    redirect, flash, session, send_from_directory, jsonify)
 from werkzeug.utils import secure_filename
-import cs304dbi as dbi
 
 
-def create_post(conn):
+
+def create_post(conn, title, description, exp_date, public, file_name, uid):
     ''' insert new post information into database '''
     with dbi.dict_cursor(conn) as curs:
-        title = request.form.get('post_title')
-        description = request.form.get('description')
-        tag = request.form.get('tag')
-        expiry_date = request.form.get('expiry_date')
-        visibility = request.form.get('visibility')
-        pic = request.form.get('pic')
-        uid = request.form.get('uid')
-        curs.execute('''INSERT INTO post (title, description, tag, expiry_date, visibility, pic, uid) VALUES (%s, %s, %s, %s, %s, %s, %s)''',
-                     (title, description, tag, expiry_date, visibility, pic, uid))
+        curs.execute('''INSERT INTO post
+        (title, description, tag, exp_date, visibility, file_name, uid) 
+        VALUES (%s, %s, %s, %s)''',
+                     (title, description, exp_date, public, file_name, uid))
+
+        post_id = curs.lastrowid
     conn.commit()
+    return post_id
+
+
+
+
+if __name__ == '__main__':
+    dbi.conf('mplteam_db')
+    with dbi.connect() as conn:
+        crpo = create_post(conn, 'hey')
+        for post in crpo:
+            print(f" {post['title']}, {post['description']},, {post['exp_date']} ")
+
+
 
