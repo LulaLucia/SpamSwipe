@@ -15,13 +15,13 @@ import query
 app.secret_key = secrets.token_hex()
 
 # configure DBI
-dsn = dbi.conf('mlp_db')
+dsn = dbi.conf('mlpteam_db')
 
 # For Lookup, use 'wmdb'
 # For CRUD and Ajax, use your personal db
 # For project work, use your team db
 
-print(dbi.conf('mlp_db'))
+print(dbi.conf('mlpteam_db'))
 
 # This gets us better error messages for certain common request errors
 app.config['TRAP_BAD_REQUEST_ERRORS'] = True
@@ -62,12 +62,13 @@ def create_post():
          file_name = request.form.get('file_name')
 
          uid = session.get('uid')
+
          with dbi.connect() as conn:
               post_id = query.create_post(conn, title, 
                                           description, exp_date,
-                                          public, file_name, uid)
+                                          public, file_name, uid) 
               flash('Post uploaded successfully.')
-              return redirect(url_for('index'))
+              return redirect(url_for('profile'))
     return render_template('create_post.html', page_title = 'Create a Post')
      
 
