@@ -144,6 +144,19 @@ nav button:hover, button:focus, nav a:hover, nav a:focus {
     gap: 7px;
 }
 
+/*created for saved_post table by meleny*/
+table, th, td {
+  border: 1px solid black;
+  border-collapse:collapse;
+  width:fit-content;
+  padding: 15px;
+}
+
+caption {
+    text-align: left;
+    font-size:larger;
+}
+
 
 
 

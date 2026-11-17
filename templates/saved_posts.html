@@ -3,31 +3,59 @@
 # saved posts page
 -->
 
+<!--Notes for Meleny -->
+<!--still need to add filter table -->
 {% extends "base.html" %}
 
 {% block main_content %}
+<!--should there be multiple tables to show each week/month? Or just
+a long schedule someone can scroll through. Im kind of leaning towards
+long schedule, but ok with either-->
 
-<h1>Schedule</h1>
+<!--creating sample of what the page would look like just to get an idea,
+will be updated once there are post and saved function works-->
+<h1>Saved Post</h1>
 <table>
-    <thead>
-        <tr>
-            <th>Date</th>
-             <th>Event</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Monday</td>
-            <td>Registration</td>
-            <td>Class</td>
-        </tr>
-        <tr>
-            <td>Tuesday</td>
-            <td>Keynote Speech</td>
-        </tr>
-    </tbody>
+    <caption>Month</caption>
+  <tr>
+    <!--after every saved post creates new th. if there is multiple
+    events on the same day, checks if that date is already in the
+    schedule, if not creates new th. if yes, adds new td within th.-->
+    <th>Date 1</th>
+    <td>Event 1 Title</td>
+    <td>Date, Time, Location</td>
+    <td>Description</td>
+    <td>Host</td>
+    <!--could be actual photo, hyperlink to photo, or hyperlink to original post?-->
+    <td>Spam</td>
+  </tr>
+  <tr>
+    <th rowspan="2">Date 2</th>
+    <td>Event 2 Title</td>
+    <td>Date, Time, Location</td>
+    <td>Description</td>
+    <td>Host</td>
+    <!--could be actual photo, hyperlink to photo, or hyperlink to original post?-->
+    <td>Spam</td>
+  </tr>
+  <tr>
+    <td>Event 3 Title</td>
+    <td>Date, Time, Location</td>
+    <td>Description</td>
+    <td>Host</td>
+    <!--could be actual photo, hyperlink to photo, or hyperlink to original post?-->
+    <td>Spam</td>
+  </tr>
+  <tr>
+    <th rowspan="3">Date 3</th>
+    <td>Event 4 Title</td>
+    <td>Date, Time, Location</td>
+    <td>Description</td>
+    <td>Host</td>
+    <!--could be actual photo, hyperlink to photo, or hyperlink to original post?-->
+    <td>Spam</td>
+  </tr>
 </table>
-<p>Filler.</p>
 
 
 {% endblock %}
