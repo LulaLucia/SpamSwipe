@@ -89,10 +89,15 @@ def file_upload():
 
 
 
-#
-@app.route('/saved/')
+#page showing all saved post for the logged in user
+@app.route('/saved/', methods = ['GET'])
 def saved_posts():
-    return render_template('saved_posts.html', page_title='Saved Posts')
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    #think only difference once we add save feature would be select * from post where uid of current login = saved.uid
+    curs.execute('''select * from post order by exp_date''')
+    savedpost = curs.fetchall()
+    return render_template('saved_posts.html', page_title='Saved Posts', savedpost = savedpost)
 
 #
 @app.route('/following/')
