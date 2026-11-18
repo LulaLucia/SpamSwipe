@@ -7,9 +7,27 @@ from flask import (Flask, render_template, make_response, url_for, request,
 from werkzeug.utils import secure_filename
 app = Flask(__name__)
 
+from passlib.context import CryptContext
+from datetime import datetime, timedelta
+from pymysql import IntegrityError
+
 import secrets
 import cs304dbi as dbi
 import query
+
+pwd_context = CryptContext(
+    schemes=["argon2", "bcrypt"],
+    default="argon2",
+    deprecated=["bcrypt"],
+
+    bcrypt__rounds=12,
+    bcrypt__ident="2b",
+    bcrypt__truncate_error=True,
+
+    argon2__memory_cost=65536,  # 64 MB
+    argon2__time_cost=3,
+    argon2__parallelism=4,
+)
 
 # we need a secret_key to use flash() and sessions
 app.secret_key = secrets.token_hex()
@@ -32,7 +50,10 @@ app.config['MAX_CONTENT_LENGTH'] = 1*1024*1024 # 1 MB
 
 @app.route('/')
 def index():
-    return render_template('main.html', page_title='Main Page')
+    if session.get('logged_in') or request.cookies.get('logged_in') == 'True':
+      return render_template('main.html', page_title='Home', username=session.get('username'))
+    else: 
+        return redirect('login_page')
 
 @app.route('/about/')
 def about():
@@ -42,14 +63,116 @@ def about():
 #
 @app.route('/profile/')
 def profile():
+    if not session.get('logged_in'):
+        flash("Please log in first")
+        return redirect(url_for('index'))
     return render_template('profile.html', page_title='Profile')
 
 #
-@app.route('/login/')
+@app.route('/signup/', methods = ["POST"])
+def signup():
+    username = request.form.get("username").strip()
+    password1 = request.form.get("password1")
+    password2 = request.form.get("password2")
+    name = request.form.get("name").strip()
+    email = request.form.get("email").strip()
+    org = request.form.get("org")
+
+    if username == '':
+        flash('username is required')
+        print("redirecting 2 from signup")
+        return redirect(url_for('login_page'))
+    if password1 == '':
+        flash('password is required')
+        print("redirecting 3 from signup")
+        return redirect(url_for('login_page'))
+    if email == '' or ("@wellesley.edu" not in email):
+        flash('student email is required')
+        print("redirecting 4 from signup")
+        return redirect(url_for('login_page'))
+    if name == '':
+        flash('name is required')
+        print("redirecting 5 from signup")
+        return redirect(url_for('login_page'))
+    if password1 != password2:
+        flash("passwords do not match")
+        print("redirecting 6 from signup")
+        return redirect(url_for("login_page"))
+    
+    hashed = pwd_context.hash(password1)
+    print(hashed)
+
+    with dbi.connect() as conn:
+        with dbi.cursor(conn) as curs:
+            try:
+                curs.execute('''INSERT INTO user(uid, username, name, password, email, org_acct) VALUES(NULL, %s, %s, %s, %s, %s)''', [username, name, hashed, email, org])
+                conn.commit()
+                uid = curs.lastrowid
+            except IntegrityError as err:
+                flash('That username is taken: {}'.format(repr(err)))
+                print("redirecting 7 from signup dbi")
+                return redirect(url_for('login_page'))
+            
+            session['username'] = username
+            session['uid'] = uid
+            session['logged_in'] = True
+
+            resp = make_response(redirect(url_for('index')))
+            resp.set_cookie('logged_in', "True", expires = datetime.now()+timedelta(days=30))
+            return resp
+
+@app.route('/login/', methods = ["POST"])
 def login():
-    return render_template('login.html', page_title='Login')
+    username = request.form.get("username").strip()
+    password = request.form.get("password")
 
+    if not username or not password:
+        flash('Username and password are required.')
+        print("redirecting 8 from login")
+        return redirect(url_for('login_page'))
+    
+    with dbi.connect() as conn:
+        with dbi.cursor(conn) as curs:
+            curs.execute('''SELECT uid, password FROM user WHERE username = %s''', [username])
+            row = curs.fetchone()
+                
+            if row is None:
+                flash('Login incorrect. Try again or sign up.')
+                return redirect(url_for('index'))
+            stored = row[1]
+            okay, newhash = pwd_context.verify_and_update(password, stored)
 
+            if okay:
+                print("They matched!")
+                flash("Successfuly logged in as " +username)
+                session['username'] = username
+                session['uid'] = row[0]
+                session['logged_in'] = True
+                if newhash is not None:
+                    curs.execute('''update user set password = %s where uid = %s''', [newhash, row['uid']])
+                    conn.commit()
+                resp = make_response(redirect(url_for('index')))
+                resp.set_cookie('logged_in', "True", expires=datetime.now() + timedelta(days=30))
+                return resp
+            else:
+                flash("Login incorrect. Try again or register")
+                print("redirecting 9 from login")
+                return redirect(url_for('login_page'))
+
+@app.route('/login_page/')
+def login_page():
+    if session.get('logged_in') or request.cookies.get('logged_in') == 'True':
+        return redirect(url_for('index'))
+    return render_template('login.html', page_title='Welcome / Log In')
+
+@app.route('/logout/')
+def logout():
+    session.clear()
+    print("redirecting 10 from logout")
+    resp = make_response(redirect(url_for('login_page')))
+    resp.set_cookie('logged_in', '', expires=0)
+    flash('Logged out successfully.')
+    return resp
 
 #
 @app.route('/post/', methods = ['GET', 'POST'])
