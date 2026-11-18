@@ -6,9 +6,31 @@
 {% extends "base.html" %}
 
 {% block main_content %}
+<h1>Log In</h1>
+<form  action="{{url_for('login')}}" method="POST">
+    <label for="username">Username:</label> 
+    <input type="text" id="username" name="username" required style="display:block">
+    <label for="password">Password:</label>
+    <input type="text" id="password" name="password" required style="display:block">
 
-<h1>Login/Logout</h1>
-<p>Filler.</p>
+    <input type="submit" value="Log In">
+</form>
 
+<h1>Sign Up</h1>
+<form  action="{{url_for('signup')}}" method="POST">
+    <label for="signup-username">Username:</label>  
+    <input type="text" id="signup-username" name="username" required style="display:block">
+    <label for="signup-name">Name:</label>
+    <input type="text" id="signup-name" name="name" required style="display:block">
+    <label for="signup-email">Email:</label>
+    <input type="text" id="signup-email" name="email" required style="display:block">
+    <label for="signup-password">Password:</label>
+    <input type="text" id="signup-password" name="password1" required style="display:block">
+    <label for="signup-password2">Confirm Password:</label>
+    <input type="text" id="signup-password2" name="password2" required style="display:block">
+    <label for="signup-org">Is this account for a student org?</label>
+    <input type="checkbox" id="signup-org" name="org">
+    <input type="submit" value="Sign Up" style="display:block">
+</form>
 
 {% endblock %}
