@@ -8,7 +8,34 @@
 {% block main_content %}
 
 <h1>Profile</h1>
-<p>Filler.</p>
+<!--displays logged in user account information-->
+<div class="userinfo">
+    <h2>{{ user.name }}</h2>
+    <p><strong>Username:</strong> {{ user.username }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>Account Type:</strong>
+        {% if user.org_acct %}
+            Organization
+        {% else %}
+            Student
+        {% endif %}
+    </p>
+    <p><strong>Followed Tags: </strong></p>
+</div>
+
+<!--displays logged in users created post-->
+<h2>My Posts</h2>
+{% if post %}
+<div class="postgrid">
+    {% for p in post %}
+        <div class="post">
+            <h3>{{ p.title }}</h3>
+        </div>
+    {% endfor %}
+</div>
+{% else %}
+    <p>No post yet!</p>
+{% endif %}
 
 
 {% endblock %}

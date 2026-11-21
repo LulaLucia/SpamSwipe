@@ -158,6 +158,28 @@ caption {
 }
 
 
+.userinfo {
+    border: 3px solid #5c004b;
+    border-radius: 15px;
+    background-color: #FFEBFA;
+    padding: 20px;
+    margin-bottom: 30px;
+} 
+
+.postgrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin: 20px;
+}
+
+.post {
+    border: 3px solid #5c004b;
+    border-radius: 15px;
+    padding: 20px;
+    background-color: #FFEBFA;
+    text-align: center;
+}
 
 
 

@@ -29,8 +29,11 @@ pwd_context = CryptContext(
     argon2__parallelism=4,
 )
 
+
+#was causing a new key to be created every time page refreshed even if same user/session
 # we need a secret_key to use flash() and sessions
-app.secret_key = secrets.token_hex()
+#app.secret_key = secrets.token_hex()
+app.secret_key = 'secretekey'
 
 # configure DBI
 dsn = dbi.conf('mlpteam_db')
@@ -50,10 +53,10 @@ app.config['MAX_CONTENT_LENGTH'] = 1*1024*1024 # 1 MB
 
 @app.route('/')
 def index():
-    if session.get('logged_in') or request.cookies.get('logged_in') == 'True':
+    if session.get('logged_in'):
       return render_template('main.html', page_title='Home', username=session.get('username'))
     else: 
-        return redirect('login_page')
+        return redirect('/login_page/')
 
 @app.route('/about/')
 def about():
@@ -62,11 +65,25 @@ def about():
 
 #
 @app.route('/profile/')
-def profile():
+def profile(): 
+    #checks if logged in
     if not session.get('logged_in'):
-        flash("Please log in first")
-        return redirect(url_for('index'))
-    return render_template('profile.html', page_title='Profile')
+       flash("Please log in first")
+       return redirect(url_for('index'))
+
+    uid = session.get('uid')
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    
+    #user info
+    curs.execute('''select username, name, org_acct, email from user where uid = %s''', [uid])
+    user = curs.fetchone()
+
+    #posts
+    curs.execute('''select title from post where uid = %s''', [uid])
+    post = curs.fetchall()
+
+    return render_template('profile.html', page_title='Profile', user = user, post = post)
 
 #
 @app.route('/signup/', methods = ["POST"])
@@ -148,6 +165,8 @@ def login():
                 session['username'] = username
                 session['uid'] = row[0]
                 session['logged_in'] = True
+                print("session after: ", session)
+                return redirect(url_for('index'))
                 if newhash is not None:
                     curs.execute('''update user set password = %s where uid = %s''', [newhash, row['uid']])
                     conn.commit()
@@ -161,7 +180,7 @@ def login():
 
 @app.route('/login_page/')
 def login_page():
-    if session.get('logged_in') or request.cookies.get('logged_in') == 'True':
+    if session.get('logged_in'):
         return redirect(url_for('index'))
     return render_template('login.html', page_title='Welcome / Log In')
 
