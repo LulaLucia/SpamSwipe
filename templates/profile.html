@@ -8,7 +8,9 @@
 {% block main_content %}
 
 <h1>Profile</h1>
-<!--displays logged in user account information-->
+<div class="layout">
+<!--displays logged in user account information and followed tags-->
+<div class="leftside">
 <div class="userinfo">
     <h2>{{ user.name }}</h2>
     <p><strong>Username:</strong> {{ user.username }}</p>
@@ -20,10 +22,15 @@
             Student
         {% endif %}
     </p>
-    <p><strong>Followed Tags: </strong></p>
+</div>
+    <div class="tags">
+        <p><strong>Followed Tags: </strong></p>
+    </div>
 </div>
 
+
 <!--displays logged in users created post-->
+<div class="postsection">
 <h2>My Posts</h2>
 {% if post %}
 <div class="postgrid">
@@ -35,6 +42,8 @@
 </div>
 {% else %}
     <p>No post yet!</p>
+</div>
+</div>
 {% endif %}
 
 

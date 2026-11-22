@@ -89,6 +89,7 @@ nav li.right {
 
 nav button:hover, button:focus, nav a:hover, nav a:focus {
     background-color: var(--color-focus);
+    color: #5c004b;
 }
 
 /* create text boxes for text on web pages */
@@ -97,7 +98,7 @@ nav button:hover, button:focus, nav a:hover, nav a:focus {
     padding: 70px;
     padding-bottom: 225px;
     background-color: #FAF9F6;
-    max-width: 700px;
+    max-width: 1000px;
     border-radius: 20px;
     margin: 60px auto 0; 
 }
@@ -144,14 +145,6 @@ nav button:hover, button:focus, nav a:hover, nav a:focus {
     gap: 7px;
 }
 
-/*created for saved_post table by meleny*/
-table, th, td {
-  border: 1px solid black;
-  border-collapse:collapse;
-  width:fit-content;
-  padding: 15px;
-}
-
 caption {
     text-align: left;
     font-size:larger;
@@ -181,6 +174,28 @@ caption {
     text-align: center;
 }
 
+.layout {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+.userinfo, .tags {
+    width: 250px;
+    flex-shrink: 0;
+
+    border: 3px solid #5c004b;
+    border-radius: 15px;
+    background-color: #FFEBFA;
+    padding: 20px;
+}
+
+
+
+.postsection {
+    width: 250px;
+    flex: 1
+}
 
 
 

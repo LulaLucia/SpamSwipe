@@ -3,8 +3,19 @@
 
 {% block main_content %}
 
-<h1>SpamSwipe</h1>
-<p>Feed</p>
+<h1>Feed</h1>
+<!--displays all post-->
+{% if post %}
+<div class="postgrid">
+    {% for p in post %}
+        <div class="post">
+            <h3>{{ p.title }}</h3>
+        </div>
+    {% endfor %}
+</div>
+{% else %}
+    <p>No post yet!</p>
+{% endif %}
 
 
 {% endblock %}

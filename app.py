@@ -54,7 +54,11 @@ app.config['MAX_CONTENT_LENGTH'] = 1*1024*1024 # 1 MB
 @app.route('/')
 def index():
     if session.get('logged_in'):
-      return render_template('main.html', page_title='Home', username=session.get('username'))
+        conn = dbi.connect()
+        curs = dbi.dict_cursor(conn)
+        curs.execute('''select title from post''')
+        post = curs.fetchall()
+        return render_template('main.html', page_title='Home', username=session.get('username'), post = post)
     else: 
         return redirect('/login_page/')
 

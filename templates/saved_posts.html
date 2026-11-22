@@ -3,8 +3,7 @@
 # saved posts page
 -->
 
-<!--Notes for Meleny -->
-<!--still need to add filter table -->
+<!--code will be similar to that of profile-->
 {% extends "base.html" %}
 
 {% block main_content %}
@@ -16,34 +15,5 @@
       <!-- change to date type in table? -->
       <input type="date" id="date" name="date" min="2026-10-11" required />
   </form>
-</table>
-<table>
-    <caption>Month</caption>
-  <tr>
-    <!--after every saved post creates new th. if there is multiple
-    events on the same day, checks if that date is already in the
-    schedule, if not creates new th. if yes, adds new td within th.-->
-
-  <table>
-
-{% set dates = namespace(last_date=None) %}
-
-{% for post in savedpost %}
-<tr>
-
-    {% if post.exp_date != dates.last_date %}
-        <th>{{ post.exp_date }}</th>
-        {% set dates.last_date = post.exp_date %}
-    {% else %}
-        <th></th>
-    {% endif %}
-
-    <td>{{ post.title }}</td>
-
-</tr>
-{% endfor %}
-
-</table>
-
   
 {% endblock %}
