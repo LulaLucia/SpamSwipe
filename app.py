@@ -5,6 +5,7 @@ import os
 from flask import (Flask, render_template, make_response, url_for, request,
                    redirect, flash, session, send_from_directory, jsonify)
 from werkzeug.utils import secure_filename
+
 app = Flask(__name__)
 
 from passlib.context import CryptContext
@@ -51,12 +52,14 @@ app.config['TRAP_BAD_REQUEST_ERRORS'] = True
 app.config['UPLOADS'] = '/students/mlpteam/uploads/'
 app.config['MAX_CONTENT_LENGTH'] = 1*1024*1024 # 1 MB
 
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+
 @app.route('/')
 def index():
     if session.get('logged_in'):
         conn = dbi.connect()
         curs = dbi.dict_cursor(conn)
-        curs.execute('''select title from post''')
+        curs.execute('''select title, description, exp_date, file_name from post''')
         post = curs.fetchall()
         return render_template('main.html', page_title='Home', username=session.get('username'), post = post)
     else: 
@@ -84,7 +87,7 @@ def profile():
     user = curs.fetchone()
 
     #posts
-    curs.execute('''select title from post where uid = %s''', [uid])
+    curs.execute('''select title, description, exp_date, file_name from post where uid = %s''', [uid])
     post = curs.fetchall()
 
     return render_template('profile.html', page_title='Profile', user = user, post = post)
@@ -200,39 +203,57 @@ def logout():
 #
 @app.route('/post/', methods = ['GET', 'POST'])
 def create_post():
+    '''uploads create_post form information into database
+        and processes files'''
     if request.method == 'POST': 
          title = request.form.get('title')
          description = request.form.get('description')
+         #tag = request.form.get('tag')
          exp_date = request.form.get('exp_date')
          public = request.form.get('visibility') == 'public'
-         file_name = request.form.get('file_name')
 
          uid = session.get('uid')
+         if uid is None:
+             return redirect(url_for('login'))
 
+         # get uploaded file
+         f = request.files.get('file_name')
+
+         if f is None or f.filename == '':
+             flash('Please select a file.')
+             return redirect(url_for('create_post'))
+
+         original_name = secure_filename(f.filename)
+         extension = original_name.rsplit('.', 1)[-1].lower()
+
+         if '.' not in original_name or extension not in ALLOWED_EXTENSIONS:
+             flash('Inavlid file type.')
+             return redirect(url_for('create_post'))
+
+        # name file
+         file_name = secure_filename(f.filename)
+
+
+        # save file
+         pathname = os.path.join(app.config['UPLOADS'], file_name)
+         f.save(pathname)
+         os.chmod(pathname, 0o444)
+
+        # add post to db
          with dbi.connect() as conn:
               post_id = query.create_post(conn, title, 
                                           description, exp_date,
                                           public, file_name, uid) 
               flash('Post uploaded successfully.')
               return redirect(url_for('profile'))
+         
     return render_template('create_post.html', page_title = 'Create a Post')
      
-
-''' 
-?
-@app.route('/upload/', methods=["GET", "POST"])
-def file_upload():
-            ...
-            pathname = os.path.join(app.config['UPLOADS'],file_name)
-            f.save(pathname)
-            os.chmod(pathname, 0o444)    # readable by owner, group and others
-            ...
-'''
-
-
-                        
-
-
+@app.route('/uploads/<path:filename>')
+def uploaded_file(filename):
+    return send_from_directory(
+        app.config['UPLOADS'], filename
+    )
 
 
 #page showing all saved post for the logged in user

@@ -37,18 +37,12 @@
 
      <br><br>
 
-    <label for="picfile">Upload your spam</label>
-    <!-- remove? we have pic_id as auto-incrementing, so idk if we need
-     NM line here 
-    <p><label>NM: <input type="text" name="nm"></label></p>
-    -->
-    <p><label>Spam file: <input type="file" name="file_name"></label></p>
-    <p><input type="submit" value="upload"></p>
+    <label for="picfile">Upload your spam file</label>
+    <input type="file" name="file_name" accept="image/*" required></label>
+    
+  <button type="submit">Upload post</button>
+
 </form>
 
-{% if nm != '' and src != '' %}
-<p>Last upload: {{nm}}</p>
-<p> <img src="{{src}}"></p>
-{% endif %}
 
 {% endblock %}

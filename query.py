@@ -19,6 +19,19 @@ def create_post(conn, title, description, exp_date, public, file_name, uid):
     conn.commit()
     return post_id
 
+def get_public_posts(conn):
+    with dbi.dict_cursor(conn) as curs:
+        curs.execute(''' select * from post where public = true order by post_id desc''')
+        public_posts = curs.fetchall()
+    return public_posts
+
+def get_private_posts(conn):
+    with dbi.dict_cursor(conn) as curs:
+        curs.execute(''' select * from post where public = false order by post_id desc''')
+        private_posts = curs.fetchall()
+    return private_posts
+
+
 
 
 
