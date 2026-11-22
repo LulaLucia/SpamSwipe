@@ -8,6 +8,8 @@
 
 {% block main_content %}
 
+
+
 <h1>Saved Post</h1>
 <table>
   <form>
@@ -16,4 +18,28 @@
       <input type="date" id="date" name="date" min="2026-10-11" required />
   </form>
   
+  <!--displays saved posts-->
+{% if savedpost %}
+<div class="postgrid">
+    {% for p in savedpost %}
+        <div class="post">
+            <h3>{{ p.title }}</h3>
+            <p>{{ p.description }}</p>
+
+            {% if p.file_name %}
+                <img src="{{ url_for('uploaded_file', filename = p.file_name) }}"
+                alt="{{ p.title }}">
+                <a href="{{ url_for('uploaded_file', filename=p.file_name) }}"
+                target="_blank">
+                Open image</a>
+            {% endif %}
+            <br>
+            <p>Expires on: {{ p.exp_date }}</p>
+        </div>
+    {% endfor %}
+</div>
+{% else %}
+    <p>Nothing saved yet!</p>
+{% endif %}
+
 {% endblock %}

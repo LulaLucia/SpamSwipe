@@ -259,12 +259,28 @@ def uploaded_file(filename):
 #page showing all saved post for the logged in user
 @app.route('/saved/', methods = ['GET'])
 def saved_posts():
+    #checks if logged in
+    if not session.get('logged_in'):
+        flash("Please log in first")
+        return redirect(url_for('index'))
+    
+    uid = session.get('uid')
     conn = dbi.connect()
     curs = dbi.dict_cursor(conn)
-    #think only difference once we add save feature would be select * from post where uid of current login = saved.uid
-    curs.execute('''select * from post order by exp_date''')
+        
+    #user info
+    curs.execute('''select username, name, org_acct, email from user where uid = %s''', [uid])
+    user = curs.fetchone()
+    
+    #posts
+    curs.execute('''select title, description, exp_date, file_name from post 
+                    inner join saved 
+                    on post.post_id = saved.post_id
+                    where saved.uid = %s''', [uid])
     savedpost = curs.fetchall()
-    return render_template('saved_posts.html', page_title='Saved Posts', savedpost = savedpost)
+    
+    return render_template('saved_posts.html', page_title='Saved Posts', user = user, savedpost = savedpost)
+
 
 #
 @app.route('/following/')
