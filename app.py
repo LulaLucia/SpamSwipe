@@ -86,7 +86,7 @@ def profile():
     user = curs.fetchone()
 
     #posts
-    curs.execute('''select title, description, exp_date, file_name from post where uid = %s''', [uid])
+    curs.execute('''select post_id, title, description, exp_date, file_name from post where uid = %s''', [uid])
     post = curs.fetchall()
 
     return render_template('profile.html', page_title='Profile', user = user, post = post)
@@ -253,6 +253,50 @@ def uploaded_file(filename):
     return send_from_directory(
         app.config['UPLOADS'], filename
     )
+
+@app.route('/edit/<int:post_id>', methods = ['GET', 'POST'])
+def edit_post(post_id):
+    if not session.get('logged_in'):
+        flash('Please log in first.')
+        return redirect(url_for('index'))
+
+    uid = session.get('uid')
+
+    with dbi.connect() as conn:
+        with dbi.dict_cursor(conn) as curs:
+
+            curs.execute('''select * from post 
+                            where post_id = %s and uid = %s''',
+                         [post_id, uid])
+
+            post = curs.fetchone()
+
+            if post is None:
+                flash('Post not found.')
+                return redirect(url_for('profile.html'))
+
+            if request.method == 'POST':
+                title = request.form.get('title')
+                description = request.form.get('description')
+                #tag = request.form.get('tag')
+                exp_date = request.form.get('exp_date')
+                public = request.form.get('visibility') == 'public'
+
+                curs.execute('''update post
+                set title = %s, description = %s, 
+                exp_date = %s, public = %s
+                where post_id = %s and uid = %s''', [title, description, exp_date,
+                                                     public, post_id, uid]
+                                                    )
+                conn.commit()
+
+                flash('Post updated successfully!')
+                return redirect(url_for('profile'))
+
+    return render_template('edit_post.html', page_title='Edit Post', post=post)
+
+
+
 
 
 #page showing all saved post for the logged in user

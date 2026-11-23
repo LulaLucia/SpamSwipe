@@ -49,6 +49,9 @@
             <br>
             <p>Expires on: {{ p.exp_date }}</p>
 
+            <!-- button to edit post -->
+             <a href="{{ url_for('edit_post', post_id = p.post_id )}}">Edit</a>
+
         </div>
     {% endfor %}
 </div>
