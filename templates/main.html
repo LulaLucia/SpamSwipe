@@ -4,29 +4,53 @@
 {% block main_content %}
 
 <h1>Feed</h1>
-<!--displays all post-->
+<!--displays post individually, user swipes through-->
 {% if post %}
-<div class="postgrid">
+<div class="singlepost">
+    <!--right now just goes back to last post-->
+    <button id="prevBtn">Back</button>
     {% for p in post %}
-        <div class="post">
+    <div class="post-slide {% if not loop.first %}hidden{% endif %}">
+        <div class="indpost">
             <h3>{{ p.title }}</h3>
             <p>{{ p.description }}</p>
-
             {% if p.file_name %}
-                <img src="{{ url_for('uploaded_file', filename = p.file_name) }}"
-                alt="{{ p.title }}">
-                <a href="{{ url_for('uploaded_file', filename=p.file_name) }}"
-                target="_blank">
-                Open image</a>
+            <img src="{{ url_for('uploaded_file', filename=p.file_name) }}"
+                 alt="{{ p.title }}">
             {% endif %}
-            <br>
             <p>Expires on: {{ p.exp_date }}</p>
-        </div>
-    {% endfor %}
-</div>
-{% else %}
-    <p>No post yet!</p>
-{% endif %}
 
+            <!--saves post to db-->
+            <form method="POST" action="{{ url_for('savepost') }}">
+            <input type="hidden" name="post_id" value="{{ p.post_id }}">
+            <button type="submit">Save</button>
+    </form>
+        </div>
+    </div>
+    {% endfor %}
+    <!--right now just goes to next post-->
+    <button id="nextBtn">Next</button>
+</div>
+
+
+<!--javascript-->
+<script>
+let current = 0;
+const slides = document.querySelectorAll('.post-slide');
+
+document.getElementById('nextBtn').addEventListener('click', () => {
+    slides[current].classList.add('hidden');
+    current = (current + 1) % slides.length;
+    slides[current].classList.remove('hidden');
+});
+
+document.getElementById('prevBtn').addEventListener('click', () => {
+    slides[current].classList.add('hidden');
+    current = (current - 1 + slides.length) % slides.length;
+    slides[current].classList.remove('hidden');
+});
+</script>
+
+{% endif %}
 
 {% endblock %}

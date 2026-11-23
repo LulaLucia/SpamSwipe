@@ -59,7 +59,7 @@ def index():
     if session.get('logged_in'):
         conn = dbi.connect()
         curs = dbi.dict_cursor(conn)
-        curs.execute('''select title, description, exp_date, file_name from post''')
+        curs.execute('''select post_id, title, description, exp_date, file_name from post''')
         post = curs.fetchall()
         return render_template('main.html', page_title='Home', username=session.get('username'), post = post)
     else: 
@@ -67,7 +67,6 @@ def index():
 
 @app.route('/about/')
 def about():
-    flash('this is a flashed message')
     return render_template('about.html', page_title='About Us')
 
 #
@@ -280,6 +279,24 @@ def saved_posts():
     savedpost = curs.fetchall()
     
     return render_template('saved_posts.html', page_title='Saved Posts', user = user, savedpost = savedpost)
+
+@app.route('/savepost/', methods = ['POST'])
+def savepost():
+    uid = session.get('uid')
+    postid = request.form.get('post_id')
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    #stops from user saving post twice, prob wont be needed in final version
+    curs.execute('''select * from saved where uid = %s and post_id = %s''', [uid, postid])
+    dup = curs.fetchone()
+    if dup:
+        flash('Already Saved')
+    else: 
+        curs.execute('''insert into saved(uid,post_id) values (%s, %s)''',[uid, postid])
+        conn.commit()
+        flash('Saved!')
+        return redirect(url_for('index'))
+    return redirect(url_for('index'))
 
 
 #
