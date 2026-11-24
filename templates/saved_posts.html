@@ -10,7 +10,7 @@
 
 
 
-<h1>Saved Post</h1>
+<h1>Saved Posts</h1>
 <table>
   <!--<form>
     <label for="date">Filter by Date:</label>
@@ -32,9 +32,18 @@
                 <a href="{{ url_for('uploaded_file', filename=p.file_name) }}"
                 target="_blank">
                 Open image</a>
+                
             {% endif %}
             <br>
             <p>Expires on: {{ p.exp_date }}</p>
+
+             <!-- form to unsave post -->
+              <form method="POST"
+              action="{{ url_for('unsave_post', post_id = p.post_id )}}"
+              onsubmit="return confirm('Are you sure you want to unsave this post?');">
+              <button type="submit">Unsave</button>
+            </form>
+
         </div>
     {% endfor %}
 </div>

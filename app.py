@@ -296,6 +296,57 @@ def edit_post(post_id):
     return render_template('edit_post.html', page_title='Edit Post', post=post)
 
 
+@app.route('/delete/<int:post_id>', methods=['POST'])
+def delete_post(post_id):
+    if not session.get('logged_in'):
+            flash('Please log in first.')
+            return redirect(url_for('index'))
+    
+    uid = session.get('uid')
+    
+    with dbi.connect() as conn:
+        with dbi.dict_cursor(conn) as curs:
+    
+                curs.execute('''delete from post where
+                post_id = %s and uid = %s''', [post_id, uid])
+
+                if curs.rowcount == 0:
+                    flash('Post not found.')
+
+                else:
+                    conn.commit()
+                    flash('Post deleted successfully!')
+    
+        return redirect(url_for('profile'))
+
+
+@app.route('/unsave/<int:post_id>', methods=['POST'])
+def unsave_post(post_id):
+    if not session.get('logged_in'):
+            flash('Please log in first.')
+            return redirect(url_for('index'))
+    
+    uid = session.get('uid')
+    
+    with dbi.connect() as conn:
+        with dbi.dict_cursor(conn) as curs:
+    
+                curs.execute('''delete from saved where
+                post_id = %s and uid = %s''', [post_id, uid])
+
+                if curs.rowcount == 0:
+                    flash('Post not found.')
+
+                else:
+                    conn.commit()
+                    flash('Post unsaved successfully!')
+    
+        return redirect(url_for('saved_posts'))
+    
+
+
+
+
 
 
 
@@ -316,7 +367,7 @@ def saved_posts():
     user = curs.fetchone()
     
     #posts
-    curs.execute('''select title, description, exp_date, file_name from post 
+    curs.execute('''select post.post_id, title, description, exp_date, file_name from post 
                     inner join saved 
                     on post.post_id = saved.post_id
                     where saved.uid = %s''', [uid])
