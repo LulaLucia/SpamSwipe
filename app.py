@@ -63,7 +63,7 @@ def index():
         post = curs.fetchall()
         return render_template('main.html', page_title='Home', username=session.get('username'), post = post)
     else: 
-        return redirect('/login_page/')
+        return redirect(url_for('login_page'))
 
 @app.route('/about/')
 def about():
