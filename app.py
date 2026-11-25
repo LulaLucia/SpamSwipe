@@ -1,5 +1,6 @@
+# November 25, 2026 
+#Polina P, Meleny S, Lula L
 import os
-# Polina, Meleny, Lula
 # Flask root application to define flask instance and define routes
 
 from flask import (Flask, render_template, make_response, url_for, request,
@@ -30,20 +31,12 @@ pwd_context = CryptContext(
     argon2__parallelism=4,
 )
 
-
-#was causing a new key to be created every time page refreshed even if same user/session
 # we need a secret_key to use flash() and sessions
 #app.secret_key = secrets.token_hex()
 app.secret_key = 'secretekey'
 
 # configure DBI
 dsn = dbi.conf('mlpteam_db')
-
-# For Lookup, use 'wmdb'
-# For CRUD and Ajax, use your personal db
-# For project work, use your team db
-
-print(dbi.conf('mlpteam_db'))
 
 # This gets us better error messages for certain common request errors
 app.config['TRAP_BAD_REQUEST_ERRORS'] = True
@@ -56,6 +49,7 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
 @app.route('/')
 def index():
+    """Checks if the user is logged in, if so displays the home feed page. If not logged in redirects to login page"""
     if session.get('logged_in'):
         conn = dbi.connect()
         curs = dbi.dict_cursor(conn)
@@ -67,11 +61,12 @@ def index():
 
 @app.route('/about/')
 def about():
+    """Displays about us page"""
     return render_template('about.html', page_title='About Us')
 
-#
 @app.route('/profile/')
 def profile(): 
+    """Checks if user is logged in. Gets the logged in users account information and any post they have created. Displays them on profile page."""
     #checks if logged in
     if not session.get('logged_in'):
        flash("Please log in first")
@@ -91,9 +86,10 @@ def profile():
 
     return render_template('profile.html', page_title='Profile', user = user, post = post)
 
-#
 @app.route('/signup/', methods = ["POST"])
 def signup():
+    """Retrieves form form information where user created account. Ensures all values are correct, and that username is not already in db,
+    if so returns to login page to try again. If all information is valid, inserts into db, creates session, and redirects to home page"""
     username = request.form.get("username").strip()
     password1 = request.form.get("password1")
     password2 = request.form.get("password2")
@@ -105,18 +101,22 @@ def signup():
         flash('username is required')
         print("redirecting 2 from signup")
         return redirect(url_for('login_page'))
+
     if password1 == '':
         flash('password is required')
         print("redirecting 3 from signup")
         return redirect(url_for('login_page'))
+
     if email == '' or ("@wellesley.edu" not in email):
         flash('student email is required')
         print("redirecting 4 from signup")
         return redirect(url_for('login_page'))
+
     if name == '':
         flash('name is required')
         print("redirecting 5 from signup")
         return redirect(url_for('login_page'))
+
     if password1 != password2:
         flash("passwords do not match")
         print("redirecting 6 from signup")
@@ -127,6 +127,7 @@ def signup():
 
     with dbi.connect() as conn:
         with dbi.cursor(conn) as curs:
+
             try:
                 curs.execute('''INSERT INTO user(uid, username, name, password, email, org_acct) VALUES(NULL, %s, %s, %s, %s, %s)''', [username, name, hashed, email, org])
                 conn.commit()
@@ -146,6 +147,8 @@ def signup():
 
 @app.route('/login/', methods = ["POST"])
 def login():
+    """Gets values from form and checks if user exists in the db, if information is not correct redirects to try again or sign up. 
+    If information is correct, creates session."""
     username = request.form.get("username").strip()
     password = request.form.get("password")
 
@@ -162,6 +165,7 @@ def login():
             if row is None:
                 flash('Login incorrect. Try again or sign up.')
                 return redirect(url_for('index'))
+
             stored = row[1]
             okay, newhash = pwd_context.verify_and_update(password, stored)
 
@@ -173,12 +177,14 @@ def login():
                 session['logged_in'] = True
                 print("session after: ", session)
                 return redirect(url_for('index'))
+
                 if newhash is not None:
                     curs.execute('''update user set password = %s where uid = %s''', [newhash, row['uid']])
                     conn.commit()
                 resp = make_response(redirect(url_for('index')))
                 resp.set_cookie('logged_in', "True", expires=datetime.now() + timedelta(days=30))
                 return resp
+
             else:
                 flash("Login incorrect. Try again or register")
                 print("redirecting 9 from login")
@@ -186,20 +192,24 @@ def login():
 
 @app.route('/login_page/')
 def login_page():
+    """Once user is logged in and has a session redirects them to home page """
     if session.get('logged_in'):
         return redirect(url_for('index'))
+
     return render_template('login.html', page_title='Welcome / Log In')
 
 @app.route('/logout/')
 def logout():
+    """Clears session and logs user out"""
     session.clear()
+
     print("redirecting 10 from logout")
     resp = make_response(redirect(url_for('login_page')))
     resp.set_cookie('logged_in', '', expires=0)
+
     flash('Logged out successfully.')
     return resp
 
-#
 @app.route('/post/', methods = ['GET', 'POST'])
 def create_post():
     '''uploads create_post form information into database
@@ -232,7 +242,6 @@ def create_post():
         # name file
          file_name = secure_filename(f.filename)
 
-
         # save file
          pathname = os.path.join(app.config['UPLOADS'], file_name)
          f.save(pathname)
@@ -250,12 +259,14 @@ def create_post():
      
 @app.route('/uploads/<path:filename>')
 def uploaded_file(filename):
+    """Displays file"""
     return send_from_directory(
         app.config['UPLOADS'], filename
     )
 
 @app.route('/edit/<int:post_id>', methods = ['GET', 'POST'])
 def edit_post(post_id):
+    """Checks if user is logged in, if not redirects. Allows user to edit their own post, and updates db."""
     if not session.get('logged_in'):
         flash('Please log in first.')
         return redirect(url_for('index'))
@@ -298,6 +309,7 @@ def edit_post(post_id):
 
 @app.route('/delete/<int:post_id>', methods=['POST'])
 def delete_post(post_id):
+    """Checks that user is logged in, if not redirects. Allows user to delete their own post and removes it from db."""
     if not session.get('logged_in'):
             flash('Please log in first.')
             return redirect(url_for('index'))
@@ -322,6 +334,7 @@ def delete_post(post_id):
 
 @app.route('/unsave/<int:post_id>', methods=['POST'])
 def unsave_post(post_id):
+    """Checks that user is logged in, if not redirects. Allows user to unsave saved post and removes from their saved table and page."""
     if not session.get('logged_in'):
             flash('Please log in first.')
             return redirect(url_for('index'))
@@ -343,16 +356,9 @@ def unsave_post(post_id):
     
         return redirect(url_for('saved_posts'))
     
-
-
-
-
-
-
-
-#page showing all saved post for the logged in user
 @app.route('/saved/', methods = ['GET'])
 def saved_posts():
+    """Checks if user is logged in, if not redirects. Gets all post user has saved."""
     #checks if logged in
     if not session.get('logged_in'):
         flash("Please log in first")
@@ -377,29 +383,31 @@ def saved_posts():
 
 @app.route('/savepost/', methods = ['POST'])
 def savepost():
+    """Allows user to save post to their account. if post is already saved, does not allow for duplicates."""
     uid = session.get('uid')
     postid = request.form.get('post_id')
     conn = dbi.connect()
     curs = dbi.dict_cursor(conn)
+
     #stops from user saving post twice, prob wont be needed in final version
     curs.execute('''select * from saved where uid = %s and post_id = %s''', [uid, postid])
     dup = curs.fetchone()
+
     if dup:
         flash('Already Saved')
+
     else: 
         curs.execute('''insert into saved(uid,post_id) values (%s, %s)''',[uid, postid])
         conn.commit()
         flash('Saved!')
         return redirect(url_for('index'))
+
     return redirect(url_for('index'))
 
-
-#
 @app.route('/following/')
 def following_feed():
+    """Currently only displays following page. In future will show tags/users the user follows"""
     return render_template('following_feed.html', page_title='Following Feed')
-
-
 
 if __name__ == '__main__':
     import sys, os

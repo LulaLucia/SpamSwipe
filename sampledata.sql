@@ -1,3 +1,7 @@
+/*November 25, 2026 
+Polina P, Meleny S, Lula L
+This file was used to insert test data into tables.
+*/
 USE mlpteam_db;
     /*passwords not correct, polina manually inserted users to create hashed version*/
     /*INSERT INTO user (uid, username, `name`, org_acct, email, `password`) VALUES
